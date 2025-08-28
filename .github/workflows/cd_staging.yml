@@ -6,11 +6,12 @@ on:
 
 jobs:
   redeploy_everything:
+    runs-on: ubuntu-latest
     name: Deploying Everything to Staging
 
     steps: 
-      -name: SSH into server
-      -run: |
+      name: SSH into server
+      run: |
         echo ${{secrets.SSH_PRIVATE_KEY}} &> ~/ssh_key 
         ssh -i ~/.ssh_key root@52.66.213.64
         cd deployment/ && git pull

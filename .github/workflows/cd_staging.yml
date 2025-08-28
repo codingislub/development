@@ -11,7 +11,7 @@ jobs:
         -run: |
           echo ${{secrets.SSH_PRIVATE_KEY}} &> ~/ssh_key 
           ssh -i ~/.ssh_key root@52.66.213.64
-          cd deployment/ && git pull
+          cd developmet/ && git pull
           pnpm install
           pnpm run build
           pm2 restart fe-server

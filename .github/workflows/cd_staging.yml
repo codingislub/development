@@ -9,7 +9,9 @@ jobs:
     name: Deploying Everything to Staging
     steps: 
       - run: |
-          echo "${{secrets.SSH_PRIVATE_KEY}}" &> ~/ssh_key 
+          echo "${{secrets.SSH_PRIVATE_KEY}}" &> ~/ssh_key
+          mkdir .ssh
+          echo "${{secrets.KNOWN_HOSTS}}" &> ~/.ssh/known_hosts3
           ssh -i ~/.ssh_key root@52.66.213.64
           cd deployment/ && git pull
           pnpm install

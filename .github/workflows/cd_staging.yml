@@ -1,35 +1,28 @@
-name: Deploy to Staging
+name: Deploy to staging
 
 on:
   push:
     branches: [ main ]
 
 jobs:
-  deploy:
+  redeploy_everything:
     runs-on: ubuntu-latest
-    
+    name: Deploying everything to the staging cluster
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/ssh_key
+          chmod 600 ~/ssh_key
+          mkdir -p ~/.ssh
+          echo "${{ secrets.KNOWN_HOSTS }}" > ~/.ssh/known_hosts
 
-    - name: Setup SSH
-      run: |
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/ssh_key
-        chmod 600 ~/ssh_key
-        mkdir -p ~/.ssh
-        echo "${{ secrets.KNOWN_HOSTS }}" > ~/.ssh/known_hosts
-        chmod 644 ~/.ssh/known_hosts
-
-    - name: Deploy to EC2
-      run: |
-        ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -i ~/ssh_key ubuntu@13.201.42.65 "
-          cd ~/development &&
-          git pull origin main &&
-          export NVM_DIR=\"\$HOME/.nvm\" &&
-          [ -s \"\$NVM_DIR/nvm.sh\" ] && \. \"\$NVM_DIR/nvm.sh\" &&
-          pnpm install &&
-          pnmp run build &&
-          pm2 restart fe-server || pm2 start npm --name fe-server -- run start &&
-          pm2 restart http-server || pm2 start npm --name http-server -- run start &&
-          pm2 restart ws-server || pm2 start npm --name ws-server -- run start
-        "
+          ssh -o StrictHostKeyChecking=yes -i ~/ssh_key ubuntu@13.201.42.65 -t "
+            cd ~/development/week-25-ci-next-app/ &&
+            git pull origin main &&
+            export PATH=/home/ubuntu/.nvm/versions/node/v22.19.0/bin:\$PATH &&
+            npm install -g pnpm &&
+            pnpm install &&
+            pnpm run build &&
+            pm2 restart fe-sever &&
+            pm2 restart http-sever &&
+            pm2 restart ws-sever
+          "

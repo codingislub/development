@@ -1,22 +1,36 @@
-- name: Setup SSH
-  run: |
-    echo "${{secrets.SSH_PRIVATE_KEY}}" > ~/ssh_key
-    chmod 600 ~/ssh_key
+name: CD to Staging
 
-    mkdir -p ~/.ssh
-    echo "${{secrets.KNOWN_HOSTS}}" > ~/.ssh/known_hosts
-    chmod 644 ~/.ssh/known_hosts
+on:
+  push:
+    branches:
+      - main
 
-- name: Deploy to EC2
-  run: |
-    ssh -o StrictHostKeyChecking=yes -i ~/ssh_key root@52.66.213.64 -t "
-      cd deployment/ &&
-      git pull origin main &&
-      export PATH=/root/.nvm/versions/node/v22.13.1/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin &&
-      npm install -g pnpm &&
-      pnpm install &&
-      pnpm run build &&
-      pm2 restart fe-server &&
-      pm2 restart http-server &&
-      pm2 restart ws-server
-    "
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        run: |
+          echo "${{secrets.SSH_PRIVATE_KEY}}" > ~/ssh_key
+          chmod 600 ~/ssh_key
+          mkdir -p ~/.ssh
+          echo "${{secrets.KNOWN_HOSTS}}" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Deploy to EC2
+        run: |
+          ssh -o StrictHostKeyChecking=yes -i ~/ssh_key root@52.66.213.64 -t "
+            cd deployment/ &&
+            git pull origin main &&
+            export PATH=/root/.nvm/versions/node/v22.13.1/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin &&
+            npm install -g pnpm &&
+            pnpm install &&
+            pnpm run build &&
+            pm2 restart fe-server &&
+            pm2 restart http-server &&
+            pm2 restart ws-server
+          "

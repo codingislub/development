@@ -24,7 +24,7 @@ jobs:
       - name: Deploy to EC2
         run: |
           ssh -o StrictHostKeyChecking=yes -i ~/ssh_key ubuntu@52.66.213.64 -t "
-            cd deployment/ &&
+            cd development/ &&
             git pull origin main &&
             export PATH=/home/ubuntu/.nvm/versions/node/v22.13.1/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin &&
             npm install -g pnpm &&

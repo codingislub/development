@@ -23,7 +23,7 @@ jobs:
 
       - name: Deploy to EC2
         run: |
-          ssh -o StrictHostKeyChecking=yes -i ~/ssh_key ubuntu@52.66.213.64 -t "
+          ssh -o StrictHostKeyChecking=yes -i ~/ssh_key ubuntu@13.201.42.65 -t "
             cd ~/development &&
             git pull origin main &&
             export NVM_DIR=\"\$HOME/.nvm\" &&

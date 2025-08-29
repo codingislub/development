@@ -31,8 +31,8 @@ jobs:
             npm install -g pnpm &&
             pnpm install &&
             pnpm run build &&
-            pm2 restart fe-server ||
-            pm2 start npm --name fe-server -- run start &&
+            pm2 restart next-server ||
+            pm2 start npm --name next-server -- run start &&
             pm2 restart http-server ||
             pm2 start npm --name http-server -- run start &&
             pm2 restart ws-server ||

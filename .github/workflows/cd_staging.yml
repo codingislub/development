@@ -35,4 +35,3 @@ jobs:
             pm2 restart fe-sever
             pm2 restart http-sever
             pm2 restart ws-sever
-          EOF

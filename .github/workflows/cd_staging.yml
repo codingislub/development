@@ -18,17 +18,20 @@ jobs:
           chmod 644 ~/.ssh/known_hosts
       - name: Deploy to EC2
         run: |
-          ssh -o StrictHostKeyChecking=yes -i ~/ssh_key ubuntu@3.110.159.132 -t "
+          ssh -o StrictHostKeyChecking=yes -o ServerAliveInterval=60 -o ServerAliveCountMax=10 -i ~/ssh_key ubuntu@3.110.159.132 -t "
             cd development/ &&
             git pull origin main &&
             export NVM_DIR=\$HOME/.nvm &&
             [ -s \"\$NVM_DIR/nvm.sh\" ] && \. \"\$NVM_DIR/nvm.sh\" &&
             npm install -g pnpm &&
             pnpm install &&
-            pnpm run build &&
+            echo 'Starting build process...' &&
+            timeout 600 pnpm run build &&
+            echo 'Build completed, restarting services...' &&
             pm2 delete fe-server http-server ws-server 2>/dev/null || true &&
             pm2 start npm --name fe-server -- run start &&
             pm2 start npm --name http-server -- run start &&
             pm2 start npm --name ws-server -- run start &&
-            pm2 save
+            pm2 save &&
+            echo 'Deployment completed successfully'
           "

@@ -26,16 +26,9 @@ jobs:
           ssh -o StrictHostKeyChecking=yes -i ~/ssh_key ubuntu@52.66.213.64 -t "
             cd ~/development &&
             git pull origin main &&
-            export NVM_DIR=\"\$HOME/.nvm\"
-            [ -s \"\$NVM_DIR/nvm.sh\" ] && \. \"\$NVM_DIR/nvm.sh\"
-            [ -s \"\$NVM_DIR/bash_completion\" ] && \. \"\$NVM_DIR/bash_completion\"
-            npm install -g pnpm &&
+            export NVM_DIR=\"\$HOME/.nvm\" &&
+            source \"\$NVM_DIR/nvm.sh\" &&
             pnpm install &&
             pnpm run build &&
-            pm2 restart fe-server ||
-            pm2 start npm --name fe-server -- run start
-            pm2 restart http-server ||
-            pm2 start npm --name http-server -- run start
-            pm2 restart ws-server ||
-            pm2 start npm --name ws-server -- run start
+            pm2 restart fe-server http-server ws-server || true
           "

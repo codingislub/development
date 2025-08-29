@@ -23,13 +23,14 @@ jobs:
 
       - name: Deploy to EC2
         run: |
-          ssh -o StrictHostKeyChecking=yes -i ~/ssh_key ubuntu@3.110.159.132 -t "
+          ssh -o StrictHostKeyChecking=yes -i ~/ssh_key ubuntu@3.110.159.132 "
             cd development/ &&
             git pull origin main &&
-            export NVM_DIR=\"$HOME/.nvm\" &&
-            [ -s \"$NVM_DIR/nvm.sh\" ] && \. \"$NVM_DIR/nvm.sh\" &&
+            export NVM_DIR=\"\$HOME/.nvm\" &&
+            [ -s \"\$NVM_DIR/nvm.sh\" ] && source \"\$NVM_DIR/nvm.sh\" &&
             nvm use 22.13.1 &&
-            npm install -g pnpm || true &&
+            npm install -g pnpm &&
+            export PATH=\"\$PATH:\$(npm config get prefix)/bin\" &&
             pnpm install &&
             pnpm run build &&
             pm2 restart fe-server --update-env &&

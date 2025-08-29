@@ -1,19 +1,35 @@
-- name: Checkout repository
-  uses: actions/checkout@v4
+name: Deploy to Staging
 
-- name: Deploy to EC2
-  uses: appleboy/ssh-action@v1.0.0
-  with:
-    host: 13.201.42.65
-    username: ubuntu
-    key: ${{ secrets.SSH_PRIVATE_KEY }}
-    script: |
-      cd ~/development
-      git pull origin main
-      export NVM_DIR="$HOME/.nvm"
-      [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-      pnpm install
-      pnpm run build
-      pm2 restart fe-server || pm2 start npm --name fe-server -- run start
-      pm2 restart http-server || pm2 start npm --name http-server -- run start
-      pm2 restart ws-server || pm2 start npm --name ws-server -- run start
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup SSH
+      run: |
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/ssh_key
+        chmod 600 ~/ssh_key
+        mkdir -p ~/.ssh
+        echo "${{ secrets.KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+        chmod 644 ~/.ssh/known_hosts
+
+    - name: Deploy to EC2
+      run: |
+        ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -i ~/ssh_key ubuntu@13.201.42.65 "
+          cd ~/development &&
+          git pull origin main &&
+          export NVM_DIR=\"\$HOME/.nvm\" &&
+          [ -s \"\$NVM_DIR/nvm.sh\" ] && \. \"\$NVM_DIR/nvm.sh\" &&
+          pnpm install &&
+          pnmp run build &&
+          pm2 restart fe-server || pm2 start npm --name fe-server -- run start &&
+          pm2 restart http-server || pm2 start npm --name http-server -- run start &&
+          pm2 restart ws-server || pm2 start npm --name ws-server -- run start
+        "
